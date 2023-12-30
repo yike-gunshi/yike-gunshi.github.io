@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Doris基础知识篇(8):profile重点指标解析 | 一颗滚石</title><meta name="author" content="一颗滚石"><meta name="copyright" content="一颗滚石"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="常用指标含义 Scan time：表示查询计划在进行扫描操作消耗的总时间，包括等待IO以及实际扫描数据所花费的时间。该指标衡量了查询的整体执行效率。 Scan wait time：表示查询计划在等待IO操作（例如读磁盘）的总时间。该指标反映了IO速度的影响。 Scan cpu time：表示查询计"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yike-gunshi.github.io/2023/12/30/Doris/profile%E9%87%8D%E7%82%B9%E6%8C%87%E6%A0%87%E8%A7%A3%E6%9E%90/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: ,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Doris基础知识篇(8):profile重点指标解析',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-12-30 20:44:02'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png')"><nav id="nav"><span id="blog-info"><a href="/" title="一颗滚石"><span class="site-name">一颗滚石</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Doris基础知识篇(8):profile重点指标解析</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-12-30T12:44:02.118Z" title="更新于 2023-12-30 20:44:02">2023-12-30</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Doris基础知识篇(8):profile重点指标解析"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><a name="PrPyP"></a></p>
+<h1 id="常用指标含义"><a href="#常用指标含义" class="headerlink" title="常用指标含义"></a>常用指标含义</h1><ul>
+<li><strong>Scan time：</strong>表示查询计划在进行扫描操作消耗的总时间，包括等待IO以及实际扫描数据所花费的时间。该指标衡量了查询的整体执行效率。</li>
+<li><strong>Scan wait time：</strong>表示查询计划在等待IO操作（例如读磁盘）的总时间。该指标反映了IO速度的影响。</li>
+<li><strong>Scan cpu time：</strong>表示查询计划在CPU处理相关操作的时间。例如，算术运算、常量表达式或者条件判断等。该指标反映了服务器负载以及查询在执行过程中的计算复杂度。</li>
+<li><strong>Fragment cpu time：</strong>表示查询计划在所有Fragments（即分区）间分配的处理器时间。Doris通常使用Fragment来存储和处理数据集的一个子集，而每个Fragment可能由多个不同的节点共享。该指标反映了不同片段间数据交换的开销、子查询和其他操作的效率等。</li>
+<li><strong>Scan worker wait time：</strong>等待scan线程调度的时间</li>
+<li><strong>Shuffle rows：</strong>代表了这个操作节点需要进行的Shuffle行数。比如在一次JOIN操作中将两表join在一起可能会有一个Shuffle 阶段<ul>
+<li><strong>shuffle说明：</strong><ul>
+<li>在上述Doris的Profile中，没有特别明显的指标显示Shuffle rows。但是我们<strong>可以通过查询计划的节点名称来推断哪些节点具有Shuffle效果，并了解该节点所需Shuffle的行数。</strong></li>
+<li>例如，在上面给出的示例中，EXCHANGE＿NODE 节点的BytesReceived的值为5.38 MB，而AGGREGATION＿NODE 节点处理了288行数据。这表明 AGGREGATION＿NODE 节点从 EXCHANGE＿NODE 节点收到了5.38MB／288≈18KB的平均数据量，这可能是通过Shuffle操作来完成的。</li>
+<li>因此，我们可以大致推断AGGREGATION＿NODE 这个节点存在Shuffle效果，并且需要打乱和重新组合288行数据。但是需要注意的是，这个推断并不准确，真正的Shuffle操作量以执行计划中标记的为准，如果遇到性能问题或瓶颈建议根据具体情况进行进一步分析。</li>
+</ul>
+</li>
+<li><strong>会导致的问题：</strong><ul>
+<li>1．性能下降：shuffle行数越多，则节点间传输数据量也就越大，会增加网络带宽和I0压力，消耗的计算和存储资源更多，极易导致执行时间延长甚至超出系统容忍范围。</li>
+<li>2．节点负载不均衡：当Shuffle Rows 不均衡时，一些节点可能会承担过多的数据传输和处理任务，导致部分节点负载不均衡，处理速度较慢，容易成为整个系统的性能瓶颈。</li>
+<li>3．内存溢出或产生临时文件：当Shuffle Rows较大时，如果没有正确配置内存或物理空间大小，有可能会导致内存溢出的异常情况发生。也可能需要将数据持久化到临时磁盘上，这样会增加IO开销，导致系统更加缓慢。</li>
+<li>4．容错性降低：当存在数据倾斜或者某一个节点异常难以处理其对应的shuffle数据分布时，整个系统的容错性会降低。因为要处理的数据量太大，一些节点很可能无法支撑承受，从而导致系统出现异常，进而影响数据计算和分析的准确性。<br />减少 Shuffle Rows的个数和量是提高Doris查询性能和稳定性的重要策略之一。可以通过数据分区、数据倾斜解决方案和合理的Doris配置等方式来有效减少Shuffle Rows的数量并提高系统性能。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><a name="YqEhB"></a></p>
+<h1 id="具体分析"><a href="#具体分析" class="headerlink" title="具体分析"></a>具体分析</h1><p><code>删除</code><br /><img src="https://cdn.nlark.com/yuque/0/2023/jpeg/22793969/1703387570544-cf34b583-e74a-469f-ab8d-feacc4789946.jpeg#averageHue=%23eeeeee&clientId=u61447b95-131f-4&from=paste&height=1240&id=LdgP8&originHeight=2480&originWidth=4013&originalType=binary&ratio=2&rotation=0&showTitle=false&size=1794513&status=done&style=none&taskId=u49aa99b4-cbd1-43c5-95a5-f107e944c6b&title=&width=2006.5" alt="IMG_0170.JPG"><br /><img src="https://cdn.nlark.com/yuque/0/2023/jpeg/22793969/1703387570439-7fd41e44-bc49-4a68-8160-c73a6dce4744.jpeg#averageHue=%23f0f0f0&clientId=u61447b95-131f-4&from=paste&height=1344&id=u58ee8cbc&originHeight=2688&originWidth=3972&originalType=binary&ratio=2&rotation=0&showTitle=false&size=1667688&status=done&style=none&taskId=u5b146395-371f-40cb-baba-7c520604c94&title=&width=1986" alt="IMG_0171.JPG"></p>
+<p><a name="YEN3X"></a></p>
+<h1 id="其他问题"><a href="#其他问题" class="headerlink" title="其他问题"></a><br />其他问题</h1><p><a name="aGdca"></a></p>
+<h2 id="1、scan-time-和-scan-cpu-time的区别"><a href="#1、scan-time-和-scan-cpu-time的区别" class="headerlink" title="1、scan time 和 scan cpu time的区别"></a>1、scan time 和 scan cpu time的区别</h2><p>在Doris查询分析中，scan time和 scan cpu time 通常是指两个不同的概念。</p>
+<ul>
+<li>Scan time 主要指通过扫描表（即执行 Scan 操作）查询所花费的时间。它包括了所有执行Scan动作时所需的时间开销，从读取磁盘数据到对数据进行过滤和处理等全部流程，通常包括包括网络传输延迟时间、IO操作时间以及CPU计算时间。因此，Scan Time是全面衡量查询效率的主要指标之一。</li>
+<li>Scan CPU time 则更侧重于测算进行 Scan过程中所消耗的CPU时间。这个指标通常可以反映Scan操作是否计算密集型，从而帮助优化和调整各个阶段SQL语句的执行的方向。例如，与Cache 相关的命中／未命中值就比较适合拿来计算 Scan CPU time。<br />总体来说，Scan CPU Time 和 Scan Time 在某些情况下可能存在相关性，但并不是直接的因果关系。Scan CPU Time 用于衡量查询当中具有计算需求的部分，而Scan Time则考虑到整个扫描过程中的所有因素，因此更具全面性。</li>
+</ul>
+<p><a name="u7yzg"></a></p>
+<h2 id="2、scan-time和scan-cpu-time这两个值几乎一样的原因"><a href="#2、scan-time和scan-cpu-time这两个值几乎一样的原因" class="headerlink" title="2、scan time和scan cpu time这两个值几乎一样的原因"></a>2、scan time和scan cpu time这两个值几乎一样的原因</h2><p>查询计划中发现 <strong>scan time 和 scan cpu time的值基本一样，大概率是因为查询计划没有遇到需要等待I0操作的瓶颈</strong>。这意味着，数据已经存储在内存或缓存中（例如，使用了MemTable），所以查询可以快速扫描数据，而无需等待从磁盘或其他介质读取数据。<br />在这种情况下，scan cpu time 可能会稍微高于 scan time，因为一些额外的计算和数据处理操作可能也产生了一些CPU开销。但需要注意的是，如果查询涉及到大量的磁盘IO操作，那么 scan time与 scan cpu time 的差异可能比较明显，因为 scan wait time 会拉大二者之间的差距。<br />综上，当scan time和 scan cpu time 相近时，表示查询性能比较好；而当scan time 明显高于 scan cpu time 时，则很可能存在瓶颈，需要进一步排查查询中可能存在的性能瓶颈。<br><a name="Uiwed"></a></p>
+<h2 id="3、scan-cpu-time和fragment-cpu-time"><a href="#3、scan-cpu-time和fragment-cpu-time" class="headerlink" title="3、scan cpu time和fragment cpu time"></a><br />3、scan cpu time和fragment cpu time</h2><p>不是同一个概念，fragment cpu time与对查询结果进行计算处理相关，而scan cpu time仅与表扫描相关，针对不同查询场景所涉及到的操作不同。</p>
+<ul>
+<li>fragment cpu time指的是查询过程中分片处理数据所消耗的CPU时间，也就是所有分区计算执行所花费的时间总和。这个时间通常也被称为“计算时间”或“运算时间”。</li>
+<li>而scan cpu time则指的是扫描表时消耗的CPU时间，它只包括查询中表扫描操作涉及到的CPU时间，例如对于某些索引类型的查询，虽然涉及到表扫描，但通过特殊的索引结构可以减少需要计算的数据量，从而降低了scan cpu time的值。<br><a name="JSTJY"></a><h2 id="4、scan-wait-time和scan-worker-wait-time的区别"><a href="#4、scan-wait-time和scan-worker-wait-time的区别" class="headerlink" title="4、scan wait time和scan worker wait time的区别"></a><br />4、scan wait time和scan worker wait time的区别</h2></li>
+</ul>
+<p><strong>Scan Wait Time（扫描等待时间）：</strong><br />指的是在查询执行过程中，扫描操作等待的总时间。它包括了多个因素的等待时间，如：</p>
+<ul>
+<li><strong>磁盘读取等待时间：</strong>当查询需要从磁盘读取数据时，如果磁盘繁忙或者数据量较大，需要等待磁盘完成读取操作，这部分时间就算作扫描等待时间。</li>
+<li><strong>网络传输等待时间：</strong>如果查询需要从其他节点获取数据，而网络传输较慢或者网络拥塞，那么查询需要等待数据传输完成，这部分时间也算作扫描等待时间。</li>
+<li><strong>数据分片等待时间：</strong>如果查询需要等待数据分片的加载或者分片的数据准备完成，那么这部分等待时间也算作扫描等待时间。<br />所以，Scan Wait Time 是整个查询过程中扫描操作等待的总时间，它反映了整个查询过程中扫描操作等待的各种因素。</li>
+</ul>
+<p><strong>Scan Worker Wait Time（扫描工作进程等待时间）</strong>：<br />指的是查询执行过程中，扫描工作进程等待的时间。在Doris中，查询会被划分为多个任务，并由不同的工作进程去执行。而在某些情况下，工作进程可能需要等待其他资源或者等待其他任务完成。例如：</p>
+<ul>
+<li>CPU 资源：如果工作进程需要等待CPU资源才能执行下一步操作，那么这部分等待时间就算作扫描工作进程等待时间。</li>
+<li>内存资源：如果工作进程需要等待内存资源才能继续执行查询操作，那么这部分等待时间也算作扫描工作进程等待时间。</li>
+<li>任务调度等待时间：如果工作进程需要等待调度系统分配任务，或者等待其他任务完成，那么这部分等待时间也计入扫描工作进程等待时间。</li>
+</ul>
+<p>所以，<strong>Scan Worker Wait Time 反映了工作进程在执行查询时等待的时间，这些等待时间可能是由于其他资源或任务的限制而产生的。</strong><br />总结来说，Scan Wait Time是整个查询过程中扫描操作等待的总时间，而Scan Worker Wait Time是工作进程在执行查询时等待其他资源或者任务完成的时间。这两个指标都是用来分析查询性能和了解查询过程中的等待情况，从而优化查询执行效率。<br>:::success<br>scan wait time在profile中叫WaitScanTime<br />scan worker wait time在profile中叫ScannerWorkerWaitTime<br /><img src="https://cdn.nlark.com/yuque/0/2023/png/22793969/1703388487994-187ad02e-332c-4429-be5d-07a69c492dab.png#averageHue=%23edf3f4&clientId=u61447b95-131f-4&from=paste&height=378&id=ud6cd7e49&originHeight=2984&originWidth=3996&originalType=binary&ratio=2&rotation=0&showTitle=false&size=6585244&status=done&style=none&taskId=u3f5f8dee-db50-48af-bee3-da1c2cf279e&title=&width=506" alt="image.png"><br>:::</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yike-gunshi.github.io">一颗滚石</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yike-gunshi.github.io/2023/12/30/Doris/profile%E9%87%8D%E7%82%B9%E6%8C%87%E6%A0%87%E8%A7%A3%E6%9E%90/">https://yike-gunshi.github.io/2023/12/30/Doris/profile%E9%87%8D%E7%82%B9%E6%8C%87%E6%A0%87%E8%A7%A3%E6%9E%90/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yike-gunshi.github.io" target="_blank">一颗滚石</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Doris/">Doris</a></div><div class="post_share"><div class="social-share" data-image="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(7):profile%E8%A7%A3%E6%9E%90/" title="Doris基础知识篇(7):profile解析"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Doris基础知识篇(7):profile解析</div></div></a></div><div class="next-post pull-right"><a href="/2023/12/17/AI/%E6%9E%81%E5%AE%A2%E5%85%AC%E5%9B%AD%E5%88%9B%E6%96%B0%E5%A4%A7%E4%BC%9A%E5%B0%8F%E8%AE%B0_converted/" title="极客公园2023创新大会笔记"><img class="cover" src="/images/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">极客公园2023创新大会笔记</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(1):思维导图</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(2):简介</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(3):数据导入导出</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/" title="Doris基础知识篇(4):数据表"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(4):数据表</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(5):数据模型</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(6):%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Doris基础知识篇(6):常用命令"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(6):常用命令</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一颗滚石</div><div class="author-info__description">We Choose To Go To The Moon</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">12</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yike-gunshi"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">持续记录</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E6%8C%87%E6%A0%87%E5%90%AB%E4%B9%89"><span class="toc-number">1.</span> <span class="toc-text">常用指标含义</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%88%86%E6%9E%90"><span class="toc-number">2.</span> <span class="toc-text">具体分析</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E9%97%AE%E9%A2%98"><span class="toc-number">3.</span> <span class="toc-text">
+其他问题</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81scan-time-%E5%92%8C-scan-cpu-time%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">3.1.</span> <span class="toc-text">1、scan time 和 scan cpu time的区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81scan-time%E5%92%8Cscan-cpu-time%E8%BF%99%E4%B8%A4%E4%B8%AA%E5%80%BC%E5%87%A0%E4%B9%8E%E4%B8%80%E6%A0%B7%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="toc-number">3.2.</span> <span class="toc-text">2、scan time和scan cpu time这两个值几乎一样的原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81scan-cpu-time%E5%92%8Cfragment-cpu-time"><span class="toc-number">3.3.</span> <span class="toc-text">
+3、scan cpu time和fragment cpu time</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4%E3%80%81scan-wait-time%E5%92%8Cscan-worker-wait-time%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="toc-number">3.4.</span> <span class="toc-text">
+4、scan wait time和scan worker wait time的区别</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92_converted/" title="无题"><img src="/images/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/12/30/%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92_converted/" title="无题">无题</a><time datetime="2023-12-30T12:32:59.348Z" title="发表于 2023-12-30 20:32:59">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/profile%E9%87%8D%E7%82%B9%E6%8C%87%E6%A0%87%E8%A7%A3%E6%9E%90_converted/" title="无题"><img src="/images/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/12/30/profile%E9%87%8D%E7%82%B9%E6%8C%87%E6%A0%87%E8%A7%A3%E6%9E%90_converted/" title="无题">无题</a><time datetime="2023-12-30T12:32:54.475Z" title="发表于 2023-12-30 20:32:54">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/" title="无题"><img src="/images/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="无题"/></a><div class="content"><a class="title" href="/2023/12/30/%E6%89%A7%E8%A1%8C%E8%AE%A1%E5%88%92/" title="无题">无题</a><time datetime="2023-12-30T07:30:34.962Z" title="发表于 2023-12-30 15:30:34">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(2):简介"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介">Doris基础知识篇(2):简介</a><time datetime="2023-12-29T17:05:09.000Z" title="发表于 2023-12-30 01:05:09">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(1):思维导图"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图">Doris基础知识篇(1):思维导图</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By 一颗滚石</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
