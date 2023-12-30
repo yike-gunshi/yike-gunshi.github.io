@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Doris基础知识篇(9):Runtime_Filter | 一颗滚石</title><meta name="author" content="一颗滚石"><meta name="copyright" content="一颗滚石"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="概念 Runtime FilterRuntime Filter 是在 Doris 0.15 版本中正式加入的新功能。旨在为某些 Join 查询在运行时动态生成过滤条件，来减少扫描的数据量，避免不必要的 I&amp;#x2F;O 和网络传输，从而加速查询Runtime Filter 在查询规划时生成，在 H"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yike-gunshi.github.io/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(9):Runtime_Filter/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: ,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Doris基础知识篇(9):Runtime_Filter',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-12-30 20:51:57'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png')"><nav id="nav"><span id="blog-info"><a href="/" title="一颗滚石"><span class="site-name">一颗滚石</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Doris基础知识篇(9):Runtime_Filter</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-12-30T12:51:57.456Z" title="更新于 2023-12-30 20:51:57">2023-12-30</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Doris基础知识篇(9):Runtime_Filter"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><a name="BQIzb"></a></p>
+<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><p><a name="GDSPQ"></a></p>
+<h2 id="Runtime-Filter"><a href="#Runtime-Filter" class="headerlink" title="Runtime Filter"></a>Runtime Filter</h2><p>Runtime Filter 是在 Doris 0.15 版本中正式加入的新功能。旨在为某些 Join 查询在运行时动态生成过滤条件，来减少扫描的数据量，避免不必要的 I&#x2F;O 和网络传输，从而加速查询<br /><strong>Runtime Filter 在查询规划时生成，在 HashJoinNode 中构建，在 ScanNode 中应用。</strong><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_2032593272.png" alt="image.png"><br><a name="jk1P2"></a></p>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p><strong>先扫描数据量小的那个表，根据这个表的出一个限制条件（边界值、in等），使用限制条件直接限制另一张表的原始扫描数据量。</strong><br />和谓词下推、分区裁剪不同， Runtime Filter 是在运行时动态生成的过滤条件，即在<strong>查询运行时解析 join on clause 确定过滤表达式</strong>，并将表达式<strong>广播给正在读取左表的ScanNode</strong>，从而减少扫描的数据量，进而<strong>减少 probe hash table 的次数</strong>，避免不必要的 I&#x2F;O 和网络传输。</p>
+<blockquote>
+<p>Runtime Filter <strong>主要用于优化针对大表的 join</strong>，如果左表的数据量太小，或者右表的数据量太大，则 Runtime Filter 可能不会取得预期效果。</p>
+</blockquote>
+<p><a name="mNaih"></a></p>
+<h2 id="BloomFilter和IN"><a href="#BloomFilter和IN" class="headerlink" title="BloomFilter和IN"></a>BloomFilter和IN</h2><p><strong>概念</strong><br />在Doris中，runtime＿filter＿type＝＇bloom＿filter＇和runtime＿filter＿type＝＇in＇是针对常规列扫描而设计的两种不同的运行时过滤器类型。</p>
+<ul>
+<li>Bloom Filter是一种基于哈希的概率性数据结构，可以高效地进行元素是否存在的查询，并且会将误差控制在可接受的范围内。在Doris中，如果在扫描某个列时设置了runtime＿filter＿type为＇bloom＿filter＇，则使用布隆过滤器来缩小扫描的范围，以提高查询性能。</li>
+<li>然而，runtime＿filter＿type＝＇in＇则会检查扫描列中的值是否匹配给定的固定值集合。这种方法的优点是，它可以避免Bloom Filte可能会出现的误报问题（即错误地将不存在的元素标记为存在）。因此，这两种运行时过滤器都有其适用场景，根据具体情况选用相应的过滤器类型可以显著提升性能和减少资源消耗。</li>
+</ul>
+<hr>
+<p><strong>过滤性能</strong><br />在子查询中，使用runtime＿filter＿type＝＇bloom＿filter＇和runtime＿filter＿type＝＇in＇过滤器会对过滤的数据量级产生不同的影响。</p>
+<ul>
+<li>当使用Bloom Filter时，它可以高效地确定一些显然不包含目标元素的块（Chunk），将这些块进行跳过，从而明显减少需要扫描的块数和时间开销。但是，如果该块上实际存在目标元素，则仍然需要进行查询操作，因此可能会比较慢。</li>
+<li>而当使用＇in＇运行时过滤器时，它可以在最开始的时候就将过滤条件与值集合进行比较，并从原始块中删除不匹配的行，从而明显减少需要扫描的数据量级和时间消耗。但是，由于＇in＇过滤器需要完全扫描原始块，因此可能会增加资源消耗。总的来说，在数据量很大且筛选结果可能较少的情况下，推荐使用Bloom Filter进行优化，而在数据量较小且需要严格匹配条件的情况下，推荐使用＇in＇过滤器。</li>
+</ul>
+<p><a name="RUf1h"></a></p>
+<h1 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h1><p>指定类型 <code>set **runtime_filter_type**=&quot;**BLOOM_FILTER**,**IN**,**MIN_MAX**&quot;</code><br />查看执行计划 <code>EXPLAIN SELECT t1 FROM test JOIN test2 where test.t1 = test2.t2;</code></p>
+<p><a name="WdVgl"></a></p>
+<h1 id="过滤器"><a href="#过滤器" class="headerlink" title="过滤器"></a>过滤器</h1><p>包括 BLOOM_FILTER、 IN、 MIN_MAX（也可以通过数字设置） ，默认会使用 IN，部分情况下同时使用 Bloom Filter、 MinMax Filter、 IN predicate 时性能更高，每个类型含义如下：<br><a name="VlCcX"></a></p>
+<h2 id="BloomFilter索引"><a href="#BloomFilter索引" class="headerlink" title="BloomFilter索引"></a>BloomFilter索引</h2><p>BloomFilter是由Bloom在1970年提出的一种多哈希函数映射的快速查找算法。通常应用在一些需要快速判断某个元素是否属于集合，但是并不严格要求100%正确的场合，BloomFilter有以下特点：</p>
+<ul>
+<li>空间效率高的概率型数据结构，<strong>用来检查一个元素是否在一个集合中</strong>。</li>
+<li>对于一个元素检测是否存在的调用，BloomFilter会告诉调用者两个结果之一：<strong>可能存在或者一定不存在。</strong></li>
+<li>缺点是存在误判，告诉你可能存在，<strong>不一定真实存在</strong>。</li>
+</ul>
+<p><br />布隆过滤器实际上是由一个超长的二进制位数组和一系列的哈希函数组成。二进制位数组初始全部为0，当给定一个待查询的元素时，这个元素会被一系列哈希函数计算映射出一系列的值，所有的值在位数组的偏移量处置为1。</p>
+<blockquote>
+<p>下图所示出一个 m&#x3D;18, k&#x3D;3 （m是该Bit数组的大小，k是Hash函数的个数）的Bloom Filter示例。集合中的 x、y、z 三个元素通过 3 个不同的哈希函数散列到位数组中。当查询元素w时，通过Hash函数计算之后因为有一个比特为0，因此w不在该集合中。<br><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_2032592046.png" alt="image.png"></p>
+</blockquote>
+<p>那么怎么判断某个元素是否在集合中呢？同样是这个元素经过哈希函数计算后得到所有的偏移位置，<strong>若这些位置全都为1，则判断这个元素在这个集合中</strong>，<strong>若有一个不为1，则判断这个元素不在这个集合中</strong>。就是这么简单！</p>
+<p>Doris的BloomFilter索引可以通过建表的时候指定，或者通过表的ALTER操作来完成。<strong>Bloom Filter本质上是一种位图结构，用于快速的判断一个给定的值是否在一个集合中</strong>。<strong>这种判断会产生小概率的误判。即如果返回false，则一定不在这个集合内。而如果范围true，则有可能在这个集合内</strong>。<br />BloomFilter索引也是以Block为粒度创建的。每个Block中，指定列的值作为一个集合生成一个BloomFilter索引条目，用于在查询是快速过滤不满足条件的数据。<br /><strong>创建</strong><br /><strong>Doris BloomFilter索引的创建是通过在建表语句的PROPERTIES里加上</strong><code>**&quot;bloom_filter_columns&quot;=&quot;k1,k2,k3&quot;**</code>**,**这个属性，k1,k2,k3是你要创建的BloomFilter索引的Key列名称，例如下面我们对表里的saler_id,category_id创建了BloomFilter索引。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE IF NOT EXISTS sale_detail_bloom  (</span><br><span class="line">    sale_date date NOT NULL COMMENT &quot;销售时间&quot;,</span><br><span class="line">    customer_id int NOT NULL COMMENT &quot;客户编号&quot;,</span><br><span class="line">    saler_id int NOT NULL COMMENT &quot;销售员&quot;,</span><br><span class="line">    sku_id int NOT NULL COMMENT &quot;商品编号&quot;,</span><br><span class="line">    category_id int NOT NULL COMMENT &quot;商品分类&quot;,</span><br><span class="line">    sale_count int NOT NULL COMMENT &quot;销售数量&quot;,</span><br><span class="line">    sale_price DECIMAL(12,2) NOT NULL COMMENT &quot;单价&quot;,</span><br><span class="line">    sale_amt DECIMAL(20,2)  COMMENT &quot;销售总金额&quot;</span><br><span class="line">)</span><br><span class="line">Duplicate  KEY(sale_date, customer_id,saler_id,sku_id,category_id)</span><br><span class="line">PARTITION BY RANGE(sale_date)</span><br><span class="line">(</span><br><span class="line">PARTITION P_202111 VALUES [(&#x27;2021-11-01&#x27;), (&#x27;2021-12-01&#x27;))</span><br><span class="line">)</span><br><span class="line">DISTRIBUTED BY HASH(saler_id) BUCKETS 10</span><br><span class="line">PROPERTIES (</span><br><span class="line">&quot;replication_num&quot; = &quot;3&quot;,</span><br><span class="line">&quot;bloom_filter_columns&quot;=&quot;saler_id,category_id&quot;,   //bloom_filter_columns</span><br><span class="line">&quot;dynamic_partition.enable&quot; = &quot;true&quot;,</span><br><span class="line">&quot;dynamic_partition.time_unit&quot; = &quot;MONTH&quot;,</span><br><span class="line">&quot;dynamic_partition.time_zone&quot; = &quot;Asia/Shanghai&quot;,</span><br><span class="line">&quot;dynamic_partition.start&quot; = &quot;-2147483648&quot;,</span><br><span class="line">&quot;dynamic_partition.end&quot; = &quot;2&quot;,</span><br><span class="line">&quot;dynamic_partition.prefix&quot; = &quot;P_&quot;,</span><br><span class="line">&quot;dynamic_partition.replication_num&quot; = &quot;3&quot;,</span><br><span class="line">&quot;dynamic_partition.buckets&quot; = &quot;3&quot;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>其他操作：<a target="_blank" rel="noopener" href="https://doris.apache.org/zh-CN/docs/data-table/index/bloomfilter">https://doris.apache.org/zh-CN/docs/data-table/index/bloomfilter</a></p>
+<p><strong>使用场景：</strong></p>
+<ol>
+<li>首先BloomFilter<strong>适用于非前缀过滤。</strong></li>
+<li>查询会根据该列高频过滤，而且<strong>查询条件大多是 in 和 &#x3D; 过滤。</strong></li>
+<li>不同于Bitmap, <strong>BloomFilter适用于高基数列</strong>。比如UserID。因为如果创建在低基数的列上，比如 “性别” 列，则每个Block几乎都会包含所有取值，导致BloomFilter索引失去意义。</li>
+</ol>
+<p><strong>注意事项：</strong></p>
+<ol>
+<li>不支持对Tinyint、Float、Double 类型的列建Bloom Filter索引。</li>
+<li>Bloom Filter索引只对 in 和 &#x3D; 过滤查询有加速效果。</li>
+<li>如果要查看某个查询是否命中了Bloom Filter索引，可以通过查询的Profile信息查看。</li>
+</ol>
+<p>MinMax Filter<br />IN predicate</p>
+<p><a name="Zbmc4"></a></p>
+<h1 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h1><p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_2032591575.png" alt="image.png"><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_2033001768.png" alt="image.png"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yike-gunshi.github.io">一颗滚石</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yike-gunshi.github.io/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(9):Runtime_Filter/">https://yike-gunshi.github.io/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(9):Runtime_Filter/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yike-gunshi.github.io" target="_blank">一颗滚石</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Doris/">Doris</a></div><div class="post_share"><div class="social-share" data-image="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(8):profile%E9%87%8D%E7%82%B9%E6%8C%87%E6%A0%87%E8%A7%A3%E6%9E%90/" title="Doris基础知识篇(8):profile重点指标解析"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Doris基础知识篇(8):profile重点指标解析</div></div></a></div><div class="next-post pull-right"><a href="/2023/12/17/AI/%E6%9E%81%E5%AE%A2%E5%85%AC%E5%9B%AD%E5%88%9B%E6%96%B0%E5%A4%A7%E4%BC%9A%E5%B0%8F%E8%AE%B0_converted/" title="极客公园2023创新大会笔记"><img class="cover" src="/images/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">极客公园2023创新大会笔记</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(1):思维导图</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(2):简介</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(3):数据导入导出</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/" title="Doris基础知识篇(4):数据表"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(4):数据表</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(5):数据模型</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(6):%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Doris基础知识篇(6):常用命令"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(6):常用命令</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一颗滚石</div><div class="author-info__description">We Choose To Go To The Moon</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">11</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yike-gunshi"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">持续记录</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Runtime-Filter"><span class="toc-number">1.1.</span> <span class="toc-text">Runtime Filter</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">原理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BloomFilter%E5%92%8CIN"><span class="toc-number">2.1.</span> <span class="toc-text">BloomFilter和IN</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%BF%87%E6%BB%A4%E5%99%A8"><span class="toc-number">4.</span> <span class="toc-text">过滤器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#BloomFilter%E7%B4%A2%E5%BC%95"><span class="toc-number">4.1.</span> <span class="toc-text">BloomFilter索引</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">5.</span> <span class="toc-text">注意事项</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(1):思维导图"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图">Doris基础知识篇(1):思维导图</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(2):简介"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介">Doris基础知识篇(2):简介</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(3):数据导入导出"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出">Doris基础知识篇(3):数据导入导出</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/" title="Doris基础知识篇(4):数据表"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(4):数据表"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/" title="Doris基础知识篇(4):数据表">Doris基础知识篇(4):数据表</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(5):数据模型"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型">Doris基础知识篇(5):数据模型</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By 一颗滚石</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
