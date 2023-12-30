@@ -1,0 +1,332 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Doris基础知识篇(4):数据表 | 一颗滚石</title><meta name="author" content="一颗滚石"><meta name="copyright" content="一颗滚石"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="基本概念 Row&amp;amp;Column一张表包括行（Row）和列（Column）。 Row 即用户的一行数据。 Column 用于描述一行数据中不同的字段。  在默认的数据模型中， Column 只分为排序列和非排序列。存储引擎会按照排序列对数据进行排序存储，并建立稀疏索引，以便在排序数据上进行快"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://yike-gunshi.github.io/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: ,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Doris基础知识篇(4):数据表',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-12-30 11:17:21'
+}</script><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.1.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg')"><nav id="nav"><span id="blog-info"><a href="/" title="一颗滚石"><span class="site-name">一颗滚石</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-graduation-cap"></i><span> 博文</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/categories/"><i class="fa-fw fa fa-archive"></i><span> 分类</span></a></li><li><a class="site-page child" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> 标签</span></a></li><li><a class="site-page child" href="/archives/"><i class="fa-fw fa fa-folder-open"></i><span> 归档</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/comment/"><i class="fa-fw fa fa-paper-plane"></i><span> 留言板</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于笔者</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Doris基础知识篇(4):数据表</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-12-30T03:17:21.132Z" title="更新于 2023-12-30 11:17:21">2023-12-30</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Doris基础知识篇(4):数据表"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><a name="OG7To"></a></p>
+<h1 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h1><p><a name="o0m4p"></a></p>
+<h2 id="Row-amp-Column"><a href="#Row-amp-Column" class="headerlink" title="Row&amp;Column"></a>Row&amp;Column</h2><p>一张表包括行（Row）和列（Column）。 <strong>Row 即用户的一行数据。 Column 用于描述一行数据中不同的字段</strong>。</p>
+<ul>
+<li>在默认的数据模型中， Column 只分为<strong>排序列</strong>和<strong>非排序列</strong>。存储引擎会<strong>按照排序列对数据进行排序存储</strong>，并<strong>建立稀疏索引</strong>，以便在排序数据上进行快速查找。</li>
+<li>而在聚合模型中，** Column 可以分为两大类： Key 和 Value<strong>。从业务角度看， Key 和Value 可以分别对应</strong>维度列<strong>和</strong>指标列<strong>。从聚合模型的角度来说，</strong> Key 列相同的行，会聚合成一行**。其中 Value 列的聚合方式由用户在建表时指定。</li>
+</ul>
+<p><a name="LH9jb"></a></p>
+<h2 id="Partition-amp-Tablet"><a href="#Partition-amp-Tablet" class="headerlink" title="Partition&amp;Tablet"></a>Partition&amp;Tablet</h2><p>用户数据<strong>先分区</strong>，<strong>再按hash值分桶</strong>。<br />分区<code>partition</code>，分桶<code>tablet</code></p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109332986.png" alt="image.png"></p>
+</blockquote>
+<p>Partiton：数据表的分区<br />Bucket：数据表的分桶，建议选择分布均匀的列</p>
+<ul>
+<li>数值大时，查询并发高</li>
+<li>数值小时，查询吞吐高<blockquote>
+<p>根据分桶列的 hash 值将数据划分成不同的 bucket。</p>
+<ul>
+<li>如果使用了 Partition，则 DISTRIBUTED … 语句描述的是数据在<strong>各个分区内</strong>的划分规则。如果不使用 Partition，则描述的是对整个表的数据的划分规则。</li>
+<li><strong>分桶列可以选择多列，但必须为 Key 列</strong>。分桶列可以和 Partition 列相同或不同。</li>
+<li>分桶列的选择，是在 <strong>查询吞吐</strong> 和 <strong>查询并发</strong> 之间的一种权衡：<ol>
+<li>如果选择多个分桶列，则数据分布更均匀。<strong>如果一个查询条件不包含所有分桶列的等值条件，那么该查询会触发所有分桶同时扫描，这样查询的吞吐会增加，单个查询的延迟随之降低。这个方式适合大吞吐低并发的查询场景。</strong></li>
+<li>如果仅选择一个或少数分桶列，则对应的点查询可以仅触发一个分桶扫描。此时，当多个点查询并发时，这些查询有较大的概率分别触发不同的分桶扫描，各个查询之间的 IO 影响较小（尤其当不同桶分布在不同磁盘上时），所以这种方式适合高并发的点查询场景。</li>
+</ol>
+</li>
+<li>分桶的数量理论上没有上限。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+<p>Tablet：物理概念，是表的分片大小，数据之间不重复。<code>Tablet = Partiton num * Bucket num</code></p>
+<blockquote>
+<ol>
+<li>注：表的数据量可以通过 <a target="_blank" rel="noopener" href="https://doris.apache.org/zh-CN/docs/dev/sql-manual/sql-reference/Show-Statements/SHOW-DATA">SHOW DATA</a> 命令查看，结果除以副本数，即表的数据量。<ul>
+<li>一个表的 Tablet 总数量等于 (Partition num * Bucket num)。</li>
+<li>一个表的 Tablet 数量，在不考虑扩容的情况下，推荐略多于整个集群的磁盘数量。</li>
+<li>单个 Tablet 的数据量理论上没有上下界，但建议在 1G - 10G 的范围内。<strong>如果单个 Tablet 数据量过小，则数据的聚合效果不佳，且元数据管理压力大。如果数据量过大，则不利于副本的迁移、补齐，且会增加 Schema Change 或者 Rollup 操作失败重试的代价（这些操作失败重试的粒度是 Tablet）。</strong></li>
+<li>当 Tablet 的数据量原则和数量原则冲突时，建议优先考虑数据量原则。</li>
+<li>在建表时，每个分区的 Bucket 数量统一指定。但是在动态增加分区时（ADD PARTITION），可以单独指定新分区的 Bucket 数量。可以利用这个功能方便的应对数据缩小或膨胀。</li>
+<li>一个 Partition 的 Bucket 数量一旦指定，不可更改。所以在确定 Bucket 数量时，需要预先考虑集群扩容的情况。比如当前只有 3 台 host，每台 host 有 1 块盘。如果 Bucket 的数量只设置为 3 或更小，那么后期即使再增加机器，也不能提高并发度。</li>
+<li>举一些例子：假设在有10台BE，每台BE一块磁盘的情况下。如果一个表总大小为 500MB，则可以考虑4-8个分片。5GB：8-16个分片。50GB：32个分片。500GB：建议分区，每个分区大小在 50GB 左右，每个分区16-32个分片。5TB：建议分区，每个分区大小在 50GB 左右，每个分区16-32个分片。</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<p><a name="wI97d"></a></p>
+<h1 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h1><p><a name="tPCnY"></a></p>
+<h2 id="建表语法"><a href="#建表语法" class="headerlink" title="建表语法"></a>建表语法</h2><p><code>create [external] table [if not exists] table_name</code><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109335609.png" alt="image.png"><br><a name="f5BI6"></a></p>
+<h3 id="复合分区"><a href="#复合分区" class="headerlink" title="复合分区"></a>复合分区</h3><p>分区+分桶</p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109337071.png" alt="image.png"></p>
+</blockquote>
+<p><a name="czwMi"></a></p>
+<h3 id="单分区"><a href="#单分区" class="headerlink" title="单分区"></a>单分区</h3><p>只分桶</p>
+<p><a name="kUuDe"></a></p>
+<h2 id="字段类型"><a href="#字段类型" class="headerlink" title="字段类型"></a>字段类型</h2><p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109339418.png" alt="image.png"><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109349565.png" alt="image.png"><br />注：<strong>聚合模型在定义字段类型后，可以指定字段的 agg_type 聚合类型，如果不指定，则该列为 key 列。否则，该列为 value 列</strong>, 类型包括： SUM、 MAX、 MIN、 REPLACE。</p>
+<p><a name="LgDae"></a></p>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><p><a name="ceQYT"></a></p>
+<h3 id="Range-Partition"><a href="#Range-Partition" class="headerlink" title="Range Partition"></a>Range Partition</h3><p><code>partition by **range(</code>date<code>)**</code><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109346381.png" alt="image.png"><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109342325.png" alt="image.png"></p>
+<p><a name="e4qlI"></a></p>
+<h3 id="List-Partition"><a href="#List-Partition" class="headerlink" title="List Partition"></a>List Partition</h3><p><code>partition by **list(</code>date<code>)**</code><br /><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109346052.png" alt="image.png"></p>
+<p><a name="AB2HU"></a></p>
+<h1 id="数据划分"><a href="#数据划分" class="headerlink" title="数据划分"></a>数据划分</h1><p><a name="WUXQ0"></a></p>
+<h2 id="列"><a href="#列" class="headerlink" title="列"></a>列</h2><p><strong>AGGREGATE KEY 数据模型中，所有没有指定聚合方式（SUM、 REPLACE、 MAX、MIN）的列视为 Key 列。而其余则为 Value 列</strong></p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109119268.png" alt="image.png"></p>
+</blockquote>
+<p><a name="cEvpi"></a></p>
+<h2 id="分区和分桶"><a href="#分区和分桶" class="headerlink" title="分区和分桶"></a>分区和分桶</h2><p><a name="Lq3Qo"></a></p>
+<h3 id="分区"><a href="#分区" class="headerlink" title="分区"></a>分区</h3><p><strong>分区Partition</strong>：<code>**range**</code>+<code>**list**</code>两种方式分区<br /><strong>使用key列分区</strong></p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109119790.png" alt="image.png"></p>
+</blockquote>
+<p><strong>range分区</strong></p>
+<blockquote>
+<p><code>**value less than (...)**</code>左闭右开<br>分区的删除不会改变已存在分区的范围。删除分区可能出现空洞<br><code>**values [...)**</code>同时指定上下界</p>
+</blockquote>
+<p><strong>list分区</strong></p>
+<blockquote>
+<p><code>**values in(...)**</code></p>
+</blockquote>
+<p><a name="GLfat"></a></p>
+<h3 id="分桶"><a href="#分桶" class="headerlink" title="分桶"></a>分桶</h3><p>分桶Bucket（Tablet）：<code>**hash**</code>一种方式分区</p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109124456.png" alt="image.png"></p>
+</blockquote>
+<p><a name="pfiVY"></a></p>
+<h3 id="复合分区-1"><a href="#复合分区-1" class="headerlink" title="复合分区"></a>复合分区</h3><p>分区+分桶</p>
+<p><a name="hxi2n"></a></p>
+<h3 id="多列分区"><a href="#多列分区" class="headerlink" title="多列分区"></a>多列分区</h3><p>range分区</p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109126227.png" alt="image.png"></p>
+</blockquote>
+<p><a name="R3zWZ"></a></p>
+<h3 id="动态分区"><a href="#动态分区" class="headerlink" title="动态分区"></a>动态分区</h3><p>用途：避免手动建立分区，麻烦。<br />通过动态分区功能，<strong>用户可以在建表时设定动态分区的规则</strong>。FE 会启动一个后台线程，根据用户指定的规则创建或删除分区。用户也可以在运行时对现有规则进行变更。</p>
+<p><strong>使用：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE tbl1</span><br><span class="line">(...)</span><br><span class="line">PROPERTIES</span><br><span class="line">(</span><br><span class="line">    &quot;dynamic_partition.prop1&quot; = &quot;value1&quot;,</span><br><span class="line">    &quot;dynamic_partition.prop2&quot; = &quot;value2&quot;,</span><br><span class="line">    ...</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><strong>运行时修改：</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE tbl1 SET</span><br><span class="line">(</span><br><span class="line">    &quot;dynamic_partition.prop1&quot; = &quot;value1&quot;,</span><br><span class="line">    &quot;dynamic_partition.prop2&quot; = &quot;value2&quot;,</span><br><span class="line">    ...</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><strong>规则参数：</strong><br />动态分区的规则参数都以 dynamic_partition. 为前缀：</p>
+<ul>
+<li><p>dynamic_partition.enable是否开启动态分区特性。可指定为 TRUE 或 FALSE。如果不填写，默认为 TRUE。如果为 FALSE，则 Doris 会忽略该表的动态分区规则。</p>
+</li>
+<li><p>dynamic_partition.time_unit动态分区调度的单位。可指定为 HOUR、DAY、WEEK、MONTH。分别表示按小时、按天、按星期、按月进行分区创建或删除。当指定为 HOUR 时，动态创建的分区名后缀格式为 yyyyMMddHH，例如2020032501。小时为单位的分区列数据类型不能为 DATE。当指定为 DAY 时，动态创建的分区名后缀格式为 yyyyMMdd，例如20200325。当指定为 WEEK 时，动态创建的分区名后缀格式为yyyy_ww。即当前日期属于这一年的第几周，例如 2020-03-25 创建的分区名后缀为 2020_13, 表明目前为2020年第13周。当指定为 MONTH 时，动态创建的分区名后缀格式为 yyyyMM，例如 202003。</p>
+</li>
+<li><p>dynamic_partition.time_zone动态分区的时区，如果不填写，则默认为当前机器的系统的时区，例如 Asia&#x2F;Shanghai，如果想获取当前支持的时区设置，可以参考 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones%E3%80%82">https://en.wikipedia.org/wiki/List_of_tz_database_time_zones。</a></p>
+</li>
+<li><p>dynamic_partition.start动态分区的起始偏移，为负数。根据 time_unit 属性的不同，以当天（星期&#x2F;月）为基准，分区范围在此偏移之前的分区将会被删除。如果不填写，则默认为 -2147483648，即不删除历史分区。</p>
+</li>
+<li><p>dynamic_partition.end动态分区的结束偏移，为正数。根据 time_unit 属性的不同，以当天（星期&#x2F;月）为基准，提前创建对应范围的分区。</p>
+</li>
+<li><p>dynamic_partition.prefix动态创建的分区名前缀。</p>
+</li>
+<li><p>dynamic_partition.buckets动态创建的分区所对应的分桶数量。</p>
+</li>
+<li><p>dynamic_partition.replication_num动态创建的分区所对应的副本数量，如果不填写，则默认为该表创建时指定的副本数量。</p>
+</li>
+<li><p>dynamic_partition.start_day_of_week当 time_unit 为 WEEK 时，该参数用于指定每周的起始点。取值为 1 到 7。其中 1 表示周一，7 表示周日。默认为 1，即表示每周以周一为起始点。</p>
+</li>
+<li><p>dynamic_partition.start_day_of_month当 time_unit 为 MONTH 时，该参数用于指定每月的起始日期。取值为 1 到 28。其中 1 表示每月1号，28 表示每月28号。默认为 1，即表示每月以1号位起始点。暂不支持以29、30、31号为起始日，以避免因闰年或闰月带来的歧义。</p>
+</li>
+<li><p>dynamic_partition.create_history_partition默认为 false。当置为 true 时，Doris 会自动创建所有分区，具体创建规则见下文。同时，FE 的参数 max_dynamic_partition_num 会限制总分区数量，以避免一次性创建过多分区。当期望创建的分区个数大于 max_dynamic_partition_num 值时，操作将被禁止。当不指定 start 属性时，该参数不生效。</p>
+</li>
+<li><p>dynamic_partition.history_partition_num当 create_history_partition 为 true 时，该参数用于指定创建历史分区数量。默认值为 -1， 即未设置。</p>
+</li>
+<li><p>dynamic_partition.hot_partition_num指定最新的多少个分区为热分区。对于热分区，系统会自动设置其 storage_medium 参数为SSD，并且设置 storage_cooldown_time。hot_partition_num 是往前 n 天和未来所有分区我们举例说明。假设今天是 2021-05-20，按天分区，动态分区的属性设置为：hot_partition_num&#x3D;2, end&#x3D;3, start&#x3D;-3。则系统会自动创建以下分区，并且设置 storage_medium 和 storage_cooldown_time 参数：p20210517：[“2021-05-17”, “2021-05-18”) storage_medium&#x3D;HDD storage_cooldown_time&#x3D;9999-12-31 23:59:59<br />p20210518：[“2021-05-18”, “2021-05-19”) storage_medium&#x3D;HDD storage_cooldown_time&#x3D;9999-12-31 23:59:59<br />p20210519：[“2021-05-19”, “2021-05-20”) storage_medium&#x3D;SSD storage_cooldown_time&#x3D;2021-05-21 00:00:00<br />p20210520：[“2021-05-20”, “2021-05-21”) storage_medium&#x3D;SSD storage_cooldown_time&#x3D;2021-05-22 00:00:00<br />p20210521：[“2021-05-21”, “2021-05-22”) storage_medium&#x3D;SSD storage_cooldown_time&#x3D;2021-05-23 00:00:00<br />p20210522：[“2021-05-22”, “2021-05-23”) storage_medium&#x3D;SSD storage_cooldown_time&#x3D;2021-05-24 00:00:00<br />p20210523：[“2021-05-23”, “2021-05-24”) storage_medium&#x3D;SSD storage_cooldown_time&#x3D;2021-05-25 00:00:00</p>
+</li>
+<li><p>dynamic_partition.reserved_history_periods需要保留的历史分区的时间范围。当dynamic_partition.time_unit 设置为 “DAY&#x2F;WEEK&#x2F;MONTH” 时，需要以 [yyyy-MM-dd,yyyy-MM-dd],[…,…] 格式进行设置。当dynamic_partition.time_unit 设置为 “HOUR” 时，需要以 [yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss],[…,…] 的格式来进行设置。如果不设置，默认为 “NULL”。我们举例说明。假设今天是 2021-09-06，按天分类，动态分区的属性设置为：time_unit&#x3D;”DAY&#x2F;WEEK&#x2F;MONTH”, end&#x3D;3, start&#x3D;-3, reserved_history_periods&#x3D;”[2020-06-01,2020-06-20],[2020-10-31,2020-11-15]”。则系统会自动保留：[“2020-06-01”,”2020-06-20”],<br />[“2020-10-31”,”2020-11-15”]<br />或者time_unit&#x3D;”HOUR”, end&#x3D;3, start&#x3D;-3, reserved_history_periods&#x3D;”[2020-06-01 00:00:00,2020-06-01 03:00:00]”.则系统会自动保留：[“2020-06-01 00:00:00”,”2020-06-01 03:00:00”]<br />这两个时间段的分区。其中，reserved_history_periods 的每一个 […,…] 是一对设置项，两者需要同时被设置，且第一个时间不能大于第二个时间。<br><a name="Q5AF1"></a></p>
+<h4 id="创建历史分区规则"><a href="#创建历史分区规则" class="headerlink" title="创建历史分区规则"></a>创建历史分区规则</h4><p>当 create_history_partition 为 true，即开启创建历史分区功能时，Doris 会根据 dynamic_partition.start 和 dynamic_partition.history_partition_num 来决定创建历史分区的个数。<br />假设需要创建的历史分区数量为 expect_create_partition_num，根据不同的设置具体数量如下：</p>
+</li>
+</ul>
+<ol>
+<li>create_history_partition &#x3D; true<ul>
+<li>dynamic_partition.history_partition_num 未设置，即 -1. expect_create_partition_num &#x3D; end - start;</li>
+<li>dynamic_partition.history_partition_num 已设置 expect_create_partition_num &#x3D; end - max(start, -histoty_partition_num);</li>
+</ul>
+</li>
+<li>create_history_partition &#x3D; false 不会创建历史分区，expect_create_partition_num &#x3D; end - 0;</li>
+</ol>
+<p>当 expect_create_partition_num 大于 max_dynamic_partition_num（默认500）时，禁止创建过多分区。</p>
+<p><a name="NDhFt"></a></p>
+<h3 id="临时分区"><a href="#临时分区" class="headerlink" title="临时分区"></a>临时分区</h3><p>0.12版本之后<br /><strong>临时分区是归属于某一分区表的。只有分区表可以创建临时分区。</strong></p>
+<ul>
+<li>临时分区的<strong>分区列和正式分区相同，且不可修改。</strong></li>
+<li>一张表<strong>所有临时分区之间的分区范围不可重</strong>叠，但<strong>临时分区的范围和正式分区范围可以重叠</strong>。</li>
+<li>临时分区的分区名称不能和正式分区以及其他临时分区重复。<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE tbl1 ADD TEMPORARY PARTITION tp1 VALUES LESS THAN(&quot;2020-02-01&quot;);</span><br><span class="line"></span><br><span class="line">ALTER TABLE tbl2 ADD TEMPORARY PARTITION tp1 VALUES [(&quot;2020-01-01&quot;), (&quot;2020-02-01&quot;));</span><br><span class="line"></span><br><span class="line">ALTER TABLE tbl1 ADD TEMPORARY PARTITION tp1 VALUES LESS THAN(&quot;2020-02-01&quot;)</span><br><span class="line">(&quot;in_memory&quot; = &quot;true&quot;, &quot;replication_num&quot; = &quot;1&quot;)</span><br><span class="line">DISTRIBUTED BY HASH(k1) BUCKETS 5;</span><br><span class="line"></span><br><span class="line">ALTER TABLE tbl3 ADD TEMPORARY PARTITION tp1 VALUES IN (&quot;Beijing&quot;, &quot;Shanghai&quot;);</span><br><span class="line"></span><br><span class="line">ALTER TABLE tbl4 ADD TEMPORARY PARTITION tp1 VALUES IN ((1, &quot;Beijing&quot;), (1, &quot;Shanghai&quot;));</span><br><span class="line"></span><br><span class="line">ALTER TABLE tbl3 ADD TEMPORARY PARTITION tp1 VALUES IN (&quot;Beijing&quot;, &quot;Shanghai&quot;)</span><br><span class="line">(&quot;in_memory&quot; = &quot;true&quot;, &quot;replication_num&quot; = &quot;1&quot;)</span><br><span class="line">DISTRIBUTED BY HASH(k1) BUCKETS 5;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>其他操作：<a target="_blank" rel="noopener" href="https://doris.apache.org/zh-CN/docs/advanced/partition/table-temp-partition">https://doris.apache.org/zh-CN/docs/advanced/partition/table-temp-partition</a><br><a name="VNxRb"></a></p>
+<h4 id="DROP"><a href="#DROP" class="headerlink" title="DROP"></a>DROP</h4><ul>
+<li><p>使用 Drop 操作直接删除数据库或表后，<strong>可以通过 Recover 命令恢复</strong>数据库或表（限定时间内），但临时分区不会被恢复。</p>
+</li>
+<li><p>使用 Alter 命令删除正式分区后，可以通过 Recover 命令恢复分区（限定时间内）。操作正式分区和临时分区无关。</p>
+</li>
+<li><p>使用 Alter 命令删除临时分区后，无法通过 Recover 命令恢复临时分区。<br><a name="NO3wJ"></a></p>
+<h4 id="TRUNCATE"><a href="#TRUNCATE" class="headerlink" title="TRUNCATE"></a>TRUNCATE</h4></li>
+<li><p>使用 Truncate 命令清空表，表的临时分区会被删除，且<strong>不可恢复</strong>。</p>
+</li>
+<li><p>使用 Truncate 命令清空正式分区时，不影响临时分区。</p>
+</li>
+<li><p>不可使用 Truncate 命令清空临时分区。<br><a name="lnA2p"></a></p>
+<h4 id="ALTER"><a href="#ALTER" class="headerlink" title="ALTER"></a>ALTER</h4></li>
+<li><p>当表存在临时分区时，无法使用 Alter 命令对表进行 Schema Change、Rollup 等变更操作。</p>
+</li>
+<li><p>当表在进行变更操作时，无法对表添加临时分区。</p>
+</li>
+</ul>
+<p><a name="NR0dx"></a></p>
+<h2 id="properties"><a href="#properties" class="headerlink" title="properties"></a>properties</h2><p><a name="GWc4h"></a></p>
+<h3 id="replication-num"><a href="#replication-num" class="headerlink" title="replication_num"></a>replication_num</h3><p>是每个分桶的副本数，奇数，最大副本数和机器数量一致。</p>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109138733.png" alt="image.png"></p>
+</blockquote>
+<p><a name="AiLCx"></a></p>
+<h3 id="storage-medium-amp-storage-cooldown-time"><a href="#storage-medium-amp-storage-cooldown-time" class="headerlink" title="storage_medium &amp; storage_cooldown_time"></a>storage_medium &amp; storage_cooldown_time</h3><blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109135775.png" alt="image.png"></p>
+</blockquote>
+<blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109132861.png" alt="image.png"></p>
+</blockquote>
+<p><a name="zGocb"></a></p>
+<h3 id="engine"><a href="#engine" class="headerlink" title="engine"></a>engine</h3><blockquote>
+<p><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/oss-cn-prefix/20231230_1109142519.png" alt="image.png"></p>
+</blockquote>
+<p><a name="ySHrx"></a></p>
+<h2 id="创建test用户"><a href="#创建test用户" class="headerlink" title="创建test用户"></a>创建test用户</h2><p><code>mysql **-h** hadoop1 **-P** 9030 -uroot -p</code><br /><code>create user &#39;test&#39; **identified by** &#39;test&#39;</code></p>
+<p><a name="zL1ti"></a></p>
+<h2 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h2><p><code>create database test_db;</code></p>
+<p><a name="shGqT"></a></p>
+<h2 id="用户授权"><a href="#用户授权" class="headerlink" title="用户授权"></a>用户授权</h2><p><code>**grant all on **test_db to test;</code></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://yike-gunshi.github.io">一颗滚石</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://yike-gunshi.github.io/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/">https://yike-gunshi.github.io/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://yike-gunshi.github.io" target="_blank">一颗滚石</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%85%B6%E4%BB%96/">其他</a></div><div class="post_share"><div class="social-share" data-image="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Doris基础知识篇(3):数据导入导出</div></div></a></div><div class="next-post pull-right"><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Doris基础知识篇(5):数据模型</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(1):思维导图</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(3):数据导入导出</div></div></a></div><div><a href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型"><img class="cover" src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-12-30</div><div class="title">Doris基础知识篇(5):数据模型</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="https://i.loli.net/2021/02/24/5O1day2nriDzjSu.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">一颗滚石</div><div class="author-info__description">We Choose To Go To The Moon</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">3</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">0</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yike-gunshi"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">持续记录</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="toc-number">1.</span> <span class="toc-text">基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Row-amp-Column"><span class="toc-number">1.1.</span> <span class="toc-text">Row&amp;Column</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Partition-amp-Tablet"><span class="toc-number">1.2.</span> <span class="toc-text">Partition&amp;Tablet</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BB%BA%E8%A1%A8"><span class="toc-number">2.</span> <span class="toc-text">建表</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%BA%E8%A1%A8%E8%AF%AD%E6%B3%95"><span class="toc-number">2.1.</span> <span class="toc-text">建表语法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E5%90%88%E5%88%86%E5%8C%BA"><span class="toc-number">2.1.1.</span> <span class="toc-text">复合分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%95%E5%88%86%E5%8C%BA"><span class="toc-number">2.1.2.</span> <span class="toc-text">单分区</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%97%E6%AE%B5%E7%B1%BB%E5%9E%8B"><span class="toc-number">2.2.</span> <span class="toc-text">字段类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A4%BA%E4%BE%8B"><span class="toc-number">2.3.</span> <span class="toc-text">示例</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Range-Partition"><span class="toc-number">2.3.1.</span> <span class="toc-text">Range Partition</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#List-Partition"><span class="toc-number">2.3.2.</span> <span class="toc-text">List Partition</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%88%92%E5%88%86"><span class="toc-number">3.</span> <span class="toc-text">数据划分</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%97"><span class="toc-number">3.1.</span> <span class="toc-text">列</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E5%8C%BA%E5%92%8C%E5%88%86%E6%A1%B6"><span class="toc-number">3.2.</span> <span class="toc-text">分区和分桶</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E5%8C%BA"><span class="toc-number">3.2.1.</span> <span class="toc-text">分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%A1%B6"><span class="toc-number">3.2.2.</span> <span class="toc-text">分桶</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%8D%E5%90%88%E5%88%86%E5%8C%BA-1"><span class="toc-number">3.2.3.</span> <span class="toc-text">复合分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A4%9A%E5%88%97%E5%88%86%E5%8C%BA"><span class="toc-number">3.2.4.</span> <span class="toc-text">多列分区</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E5%88%86%E5%8C%BA"><span class="toc-number">3.2.5.</span> <span class="toc-text">动态分区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%8E%86%E5%8F%B2%E5%88%86%E5%8C%BA%E8%A7%84%E5%88%99"><span class="toc-number">3.2.5.1.</span> <span class="toc-text">创建历史分区规则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%B4%E6%97%B6%E5%88%86%E5%8C%BA"><span class="toc-number">3.2.6.</span> <span class="toc-text">临时分区</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#DROP"><span class="toc-number">3.2.6.1.</span> <span class="toc-text">DROP</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#TRUNCATE"><span class="toc-number">3.2.6.2.</span> <span class="toc-text">TRUNCATE</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#ALTER"><span class="toc-number">3.2.6.3.</span> <span class="toc-text">ALTER</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#properties"><span class="toc-number">3.3.</span> <span class="toc-text">properties</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#replication-num"><span class="toc-number">3.3.1.</span> <span class="toc-text">replication_num</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#storage-medium-amp-storage-cooldown-time"><span class="toc-number">3.3.2.</span> <span class="toc-text">storage_medium &amp; storage_cooldown_time</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#engine"><span class="toc-number">3.3.3.</span> <span class="toc-text">engine</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BAtest%E7%94%A8%E6%88%B7"><span class="toc-number">3.4.</span> <span class="toc-text">创建test用户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-number">3.5.</span> <span class="toc-text">创建数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%8E%88%E6%9D%83"><span class="toc-number">3.6.</span> <span class="toc-text">用户授权</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(2):简介"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(2):%E7%AE%80%E4%BB%8B/" title="Doris基础知识篇(2):简介">Doris基础知识篇(2):简介</a><time datetime="2023-12-29T17:05:09.000Z" title="发表于 2023-12-30 01:05:09">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(1):思维导图"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(1):%E6%80%9D%E7%BB%B4%E5%AF%BC%E5%9B%BE/" title="Doris基础知识篇(1):思维导图">Doris基础知识篇(1):思维导图</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/202312301011053.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(3):数据导入导出"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(3):%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%85%A5%E5%AF%BC%E5%87%BA/" title="Doris基础知识篇(3):数据导入导出">Doris基础知识篇(3):数据导入导出</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/" title="Doris基础知识篇(4):数据表"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(4):数据表"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(4):%E6%95%B0%E6%8D%AE%E8%A1%A8/" title="Doris基础知识篇(4):数据表">Doris基础知识篇(4):数据表</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型"><img src="https://yikegunshi.oss-cn-beijing.aliyuncs.com/prefix/%E5%B0%81%E9%9D%A2%E5%9B%BE-%E5%AE%87%E8%88%AA%E5%91%98jpg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Doris基础知识篇(5):数据模型"/></a><div class="content"><a class="title" href="/2023/12/30/Doris/Doris%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E7%AF%87(5):%E6%95%B0%E6%8D%AE%E6%A8%A1%E5%9E%8B/" title="Doris基础知识篇(5):数据模型">Doris基础知识篇(5):数据模型</a><time datetime="2023-12-29T16:00:00.000Z" title="发表于 2023-12-30 00:00:00">2023-12-30</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By 一颗滚石</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
